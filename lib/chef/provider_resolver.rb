@@ -20,38 +20,51 @@ class Chef
   class ProviderResolver
 
     attr_reader :node
-    attr_reader :providers
 
     def initialize(node)
       @node = node
-      @providers = []
-      @loaded = false
     end
 
-    def load(reload = false)
-      return if loaded? && !reload
-
-      @providers = [] if reload
-
-      Chef::Provider.each do |provider|
-        @providers << provider if provider.supports_platform?(@node[:platform])
+    # return a deterministically sorted list of Chef::Provider subclasses
+    def each_provider
+      ObjectSpace.each_object(Class).sort {|a,b| a.to_s <=> b.to_s }.each do |klass|
+        yield klass if klass < Chef::Provider
       end
-
-      @loaded = true
     end
 
-    def loaded?
-      !!@loaded
+    def resolve(resource, action)
+      provider = maybe_explicit_provider(resource, action) ||
+        maybe_dynamic_provider_resolution(resource, action) ||
+        maybe_chef_platform_lookup(resource, action)
+      provider.action = action
+      provider
     end
 
-    def resolve(resource)
-      self.load if !loaded?
-
-      providers = @providers.find_all do |provider|
-        provider.enabled?(node) && provider.implements?(resource)
+    # if resource.provider is set, just return one of those objects
+    def maybe_explicit_provider(resource, action)
+      if resource.provider
+        resource.provider.new(resource, resource.run_context)
+      else
+        nil
       end
+    end
 
-      resource.evaluate_providers(providers)
+    # try dynamically finding a provider based on querying the providers to see what they support
+    def maybe_dynamic_provider_resolution(resource, action)
+      each_provider do |klass|
+        if klass.enabled?(node) && klass.implements?(resource) && klass.handles?(resource, action)
+          # Question: if we find more than one we just return the first, should we demand uniqueness
+          # and throw an error instead?
+          return klass.new(resource, resource.run_context)
+        end
+      end
+      nil
+    end
+
+    # try the old static lookup of providers by platform
+    def maybe_chef_platform_lookup(resource, action)
+      Chef::Platform.provider_for_resource(resource, action)
     end
   end
 end
+

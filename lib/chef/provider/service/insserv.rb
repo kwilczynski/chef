@@ -24,6 +24,16 @@ class Chef
     class Service
       class Insserv < Chef::Provider::Service::Init
 
+        implements :service
+
+        def self.enabled?(node)
+          node['platform_family'] == 'debian' && ::File.exist?("/sbin/insserv")
+        end
+
+        def self.handles?(resource, action)
+          ::File.exist?("/etc/init.d/#{resource.service_name}")
+        end
+
         def load_current_resource
           super
 

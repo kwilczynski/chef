@@ -27,6 +27,18 @@ class Chef
       class Upstart < Chef::Provider::Service::Simple
         UPSTART_STATE_FORMAT = /\w+ \(?(\w+)\)?[\/ ](\w+)/
 
+        implements :service
+
+        def self.enabled?(node)
+          # NB: debian >= 6.0 has /etc/init but does not have upstart
+          ::File.exist?("/etc/init") && ::File.exist?("/sbin/start")
+        end
+
+        def self.handles?(resource, action)
+          # FIXME: @upstart_job_dir and @upstart_conf_suffix need to be class variables/constants so we can use them
+          ::File.exist?("/etc/init/#{resource.service_name}.conf")
+        end
+
         # Upstart does more than start or stop a service, creating multiple 'states' [1] that a service can be in.
         # In chef, when we ask a service to start, we expect it to have started before performing the next step
         # since we have top down dependencies. Which is to say we may follow witha resource next that requires

@@ -22,6 +22,17 @@ require 'chef/mixin/command'
 require 'chef/util/path_helper'
 
 class Chef::Provider::Service::Gentoo < Chef::Provider::Service::Init
+
+  implements :service
+
+  def self.enabled?(node)
+    node['platform_family'] == "gentoo"
+  end
+
+  def self.handles?(resource, action)
+    Dir.glob("/etc/runlevels/**/#{resource.service_name}").any?
+  end
+
   def load_current_resource
 
     @new_resource.supports[:status] = true

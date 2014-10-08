@@ -20,6 +20,16 @@ require 'chef/provider/service/init'
 
 class Chef::Provider::Service::Arch < Chef::Provider::Service::Init
 
+  implements :service
+
+  def self.enabled?(node)
+    node['platform_family'] == "arch"
+  end
+
+  def self.handles?(resource, action)
+    ::File.exist?("/etc/rc.d/#{resource.service_name}")
+  end
+
   def initialize(new_resource, run_context)
     super
     @init_command = "/etc/rc.d/#{@new_resource.service_name}"

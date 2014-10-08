@@ -28,53 +28,36 @@ class Chef
     include Chef::Mixin::WhyRun
     include Chef::Mixin::ShellOut
 
-
     class << self
-      include Enumerable
+      attr_accessor :implementations
 
-      @@providers = []
-
-      attr_reader :implementations
-      attr_reader :supported_platforms
-
-      def inherited(klass)
-        @@providers << klass
+      def implementations
+        @implementations ||= []
       end
 
-      def providers
-        @@providers
-      end
-
-      def each
-        providers.each { |provider| yield provider }
-        providers
-      end
-
-      def implements(*resources)
-        options = resources.last.is_a?(Hash) ? resources.pop : {}
-
-        @implementations = resources.map { |resource| resource.to_sym }
-        @supported_platforms = Array(options[:on_platforms] || :all)
+      # Providers can declare that they implement one or more resources.
+      # (Question: does it make sense to map to more than one resource?)
+      def implements(*resource_names)
+        self.implementations += resource_names
       end
 
       def implements?(resource)
-        klass_name = resource.class.to_s.split('::').last
-        resource_name = klass_name.gsub(/([a-z0-9])([A-Z])/, '\1_\2').downcase
-
-        implementations && implementations.include?(resource_name.to_sym)
+        implementations.include?(resource.resource_name)
       end
 
-      def supports_platform?(platform)
-        supported_platforms && (
-          supported_platforms.include?(:all) ||
-          supported_platforms.include?(platform.to_sym))
+      # If the provider can handle the particular resource and action in question.
+      # The type of resource passed in here should only be resources that the provider
+      # has declared that it implements.
+      def handles?(resource, action)
+        false
       end
 
+      # If the provider is useful at all on the node
+      # (we should use this to remove_const the classes which are unused + then GC)
       def enabled?(node)
         true
       end
     end
-
 
     attr_accessor :new_resource
     attr_accessor :current_resource

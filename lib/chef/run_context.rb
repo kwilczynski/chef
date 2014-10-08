@@ -94,7 +94,6 @@ class Chef
     def load(run_list_expansion)
       @cookbook_compiler = CookbookCompiler.new(self, run_list_expansion, events)
       @cookbook_compiler.compile
-      @provider_resolver.load
     end
 
     # Adds an immediate notification to the
