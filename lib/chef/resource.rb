@@ -32,6 +32,7 @@ require 'chef/node'
 require 'chef/platform'
 
 require 'chef/mixin/deprecation'
+require 'chef/mixin/descendants_tracker'
 
 class Chef
   class Resource
@@ -133,6 +134,7 @@ F
     include Chef::Mixin::Deprecation
 
     extend Chef::Mixin::ConvertToClassName
+    extend Chef::Mixin::DescendantsTracker
 
     if Module.method(:const_defined?).arity == 1
       def self.strict_const_defined?(const)
@@ -144,24 +146,13 @@ F
       end
     end
 
-    # Track all subclasses of Resource. This is used so names can be looked up
-    # when attempting to deserialize from JSON. (See: json_compat)
-    def self.resource_classes
-      # Using a class variable here ensures we have one variable to track
-      # subclasses shared by the entire class hierarchy; without this, each
-      # subclass would have its own list of subclasses.
-      @@resource_classes ||= []
-    end
-
-    # Callback when subclass is defined. Adds subclass to list of subclasses.
-    def self.inherited(subclass)
-      resource_classes << subclass
-    end
-
-    # Look up a subclass by +class_name+ which should be a string that matches
-    # `Subclass.name`
-    def self.find_subclass_by_name(class_name)
-      resource_classes.first {|c| c.name == class_name }
+    class << self
+      # back-compat
+      # NOTE: that we do not support unregistering classes as descendents like
+      # we used to for LWRP unloading because that was horrible and removed in
+      # Chef-12.
+      alias :resource_classes :descendants
+      alias :find_subclass_by_name :find_descendants_by_name
     end
 
     # Set or return the list of "state attributes" implemented by the Resource

@@ -22,11 +22,13 @@ require 'chef/mixin/convert_to_class_name'
 require 'chef/mixin/enforce_ownership_and_permissions'
 require 'chef/mixin/why_run'
 require 'chef/mixin/shell_out'
+require 'chef/mixin/descendants_tracker'
 
 class Chef
   class Provider
     include Chef::Mixin::WhyRun
     include Chef::Mixin::ShellOut
+    extend Chef::Mixin::DescendantsTracker
 
     class << self
       attr_accessor :implementations

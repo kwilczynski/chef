@@ -27,8 +27,8 @@ class Chef
 
     # return a deterministically sorted list of Chef::Provider subclasses
     def each_provider
-      ObjectSpace.each_object(Class).sort {|a,b| a.to_s <=> b.to_s }.each do |klass|
-        yield klass if klass < Chef::Provider
+      Chef::Provider.descendants.each do |klass|
+        yield klass
       end
     end
 
@@ -67,4 +67,3 @@ class Chef
     end
   end
 end
-
