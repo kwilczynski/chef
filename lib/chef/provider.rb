@@ -32,9 +32,14 @@ class Chef
 
     class << self
       attr_accessor :implementations
+      attr_accessor :default_array
 
       def implementations
         @implementations ||= []
+      end
+
+      def default_array
+        @default_array ||= []
       end
 
       # Providers can declare that they implement one or more resources.
@@ -43,8 +48,20 @@ class Chef
         self.implementations += resource_names
       end
 
+      # Service::Init works everywhere and will always be true on any non-windows
+      # platform, we need a way to make Service::Redhat and Service::Debian
+      # be preferred, so we mark Service::Init as a 'default' and discard it if any
+      # other provider can also do the work.
+      def default_for(*resource_names)
+        self.default_array += resource_names
+      end
+
       def implements?(resource)
         implementations.include?(resource.resource_name)
+      end
+
+      def default?(resource)
+        default_array.include?(resource.resource_name)
       end
 
       # If the provider can handle the particular resource and action in question.

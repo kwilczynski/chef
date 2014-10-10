@@ -26,10 +26,8 @@ class Chef
     end
 
     # return a deterministically sorted list of Chef::Provider subclasses
-    def each_provider
-      Chef::Provider.descendants.each do |klass|
-        yield klass
-      end
+    def providers
+      Chef::Provider.descendants.sort {|a,b| a.to_s <=> b.to_s }
     end
 
     def resolve(resource, action)
@@ -42,23 +40,26 @@ class Chef
 
     # if resource.provider is set, just return one of those objects
     def maybe_explicit_provider(resource, action)
-      if resource.provider
-        resource.provider.new(resource, resource.run_context)
-      else
-        nil
-      end
+      return nil unless resource.provider
+      resource.provider.new(resource, resource.run_context)
     end
 
     # try dynamically finding a provider based on querying the providers to see what they support
     def maybe_dynamic_provider_resolution(resource, action)
-      each_provider do |klass|
-        if klass.enabled?(node) && klass.implements?(resource) && klass.handles?(resource, action)
-          # Question: if we find more than one we just return the first, should we demand uniqueness
-          # and throw an error instead?
-          return klass.new(resource, resource.run_context)
-        end
+      handlers = providers.select do |klass|
+        klass.enabled?(node) && klass.implements?(resource) && klass.handles?(resource, action)
       end
-      nil
+
+      # we need a single handler, if we have more than one reject the 'default' ones
+      if handlers.count >= 2
+        handlers.reject! { |klass| klass.default?(resource) }
+      end
+
+      raise "too many handlers" if handlers.count >= 2
+
+      return nil if handlers.empty?
+
+      handlers[0].new(resource, resource.run_context)
     end
 
     # try the old static lookup of providers by platform

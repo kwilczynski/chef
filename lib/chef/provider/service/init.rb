@@ -27,13 +27,10 @@ class Chef
         attr_accessor :init_command
 
         implements :service
+        default_for :service
 
         def self.enabled?(node)
-          # most platforms subclass and extend this provider and don't use it directly
-          # FIXME: somehow make this the default if the other service providers don't work.
-          return false if ::File.exist?("/usr/sbin/update-rc.d")
-          return false if ::File.exist?("/sbin/insserv")
-          !%w{arch mac_os_x rhel solaris windows gentoo suse}.include?(node['platform_family'])
+          node['platform_family'] != "windows"
         end
 
         def self.handles?(resource, action)
