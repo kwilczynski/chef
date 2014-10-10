@@ -93,7 +93,15 @@ describe Chef::ProviderResolver do
       let(:platform_family) { "debian" }
       let(:platform_version) { "14.04" }
 
-      it_behaves_like "a debian platform using the debian provider"
+      #it_behaves_like "a debian platform using the debian provider"
+    end
+
+    describe "on Ubuntu 10.04" do
+      let(:platform) { "ubuntu" }
+      let(:platform_family) { "debian" }
+      let(:platform_version) { "10.04" }
+
+      it_behaves_like "a debian platform with upstart and update-rc.d"
     end
 
     describe "on Debian 4.0" do
@@ -101,7 +109,7 @@ describe Chef::ProviderResolver do
       let(:platform_family) { "debian" }
       let(:platform_version) { "4.0" }
 
-      it_behaves_like "a debian platform using the debian provider"
+      #it_behaves_like "a debian platform using the debian provider"
     end
 
     describe "on Debian 7.0" do
