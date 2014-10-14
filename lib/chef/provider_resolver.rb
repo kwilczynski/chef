@@ -16,12 +16,8 @@
 # limitations under the License.
 #
 
-require 'chef/mixin/convert_to_class_name'
-
 class Chef
   class ProviderResolver
-
-    include Chef::Mixin::ConvertToClassName
 
     attr_reader :node
 

@@ -28,7 +28,7 @@ class Chef::Provider::Service::Windows < Chef::Provider::Service
   implements :service
 
   def self.enabled?(node)
-    node['platform_family'] == "windows"
+    node['os'] == "windows"
   end
 
   def self.handles?(resource, action)

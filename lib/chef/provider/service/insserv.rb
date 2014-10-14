@@ -28,9 +28,12 @@ class Chef
 
         replaces Chef::Provider::Service::Init
         replaces Chef::Provider::Service::Debian
+        replaces Chef::Provider::Service::Invokercd
+        replaces Chef::Provider::Service::Redhat
 
         def self.enabled?(node)
-          node['platform_family'] == 'debian' && platform_has_insserv?
+          node['os'] == "linux" &&
+            platform_has_insserv?
         end
 
         def self.handles?(resource, action)

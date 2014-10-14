@@ -23,6 +23,19 @@ class Chef
     class Service
       class Invokercd < Chef::Provider::Service::Init
 
+        implements :service
+
+        replaces Chef::Provider::Service::Init
+
+        def self.enabled?(node)
+          node['platform_family'] == "debian" &&
+            platform_has_invoke_rcd?
+        end
+
+        def self.handles?(resource, action)
+          platform_has_initd_script?(resource.service_name)
+        end
+
         def initialize(new_resource, run_context)
           super
           @init_command = "/usr/sbin/invoke-rc.d #{@new_resource.service_name}"

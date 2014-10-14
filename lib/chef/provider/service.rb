@@ -25,6 +25,11 @@ class Chef
 
       include Chef::Mixin::Command
 
+      def enabled?(node)
+        # this class is only inherited, it should never be used directly
+        false
+      end
+
       def initialize(new_resource, run_context)
         super
         @enabled = nil

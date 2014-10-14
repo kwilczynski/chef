@@ -26,11 +26,23 @@ class Chef
         CHKCONFIG_ON = /\d:on/
         CHKCONFIG_MISSING = /No such/
 
+        implements :service
+        replaces Chef::Provider::Service::Init
+
+        def self.enabled?(node)
+          %w{rhel fedora suse}.includes?(node['platform_family']) &&
+            platform_has_chkconfig?
+        end
+
+        def self.handles?(resource, action)
+          platform_has_initd_script?(resource.service_name)
+        end
+
         def initialize(new_resource, run_context)
           super
-           @init_command = "/sbin/service #{@new_resource.service_name}"
-           @new_resource.supports[:status] = true
-           @service_missing = false
+          @init_command = "/sbin/service #{@new_resource.service_name}"
+          @new_resource.supports[:status] = true
+          @service_missing = false
         end
 
         def define_resource_requirements

@@ -20,6 +20,27 @@ require 'chef/resource/service'
 require 'chef/provider/service/simple'
 
 class Chef::Provider::Service::Systemd < Chef::Provider::Service::Simple
+
+  implements :service
+
+  # We welcome our new systemd masters
+  replaces Chef::Provider::Service::Init
+  replaces Chef::Provider::Service::Debian
+  replaces Chef::Provider::Service::Redhat
+  replaces Chef::Provider::Service::Invokercd
+  replaces Chef::Provider::Service::Insserv
+  replaces Chef::Provider::Service::Arch
+  replaces Chef::Provider::Service::Gentoo
+
+  def self.enabled?(node)
+    node['os'] == 'linux' &&
+      platform_has_systemd?
+  end
+
+  def self.handles?(resource, action)
+    platform_has_systemd_service?(resource.service_name)
+  end
+
   def load_current_resource
     @current_resource = Chef::Resource::Service.new(@new_resource.name)
     @current_resource.service_name(@new_resource.service_name)

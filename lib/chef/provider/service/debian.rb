@@ -27,6 +27,7 @@ class Chef
 
         implements :service
         replaces Chef::Provider::Service::Init
+        replaces Chef::Provider::Service::Invokercd
 
         def self.enabled?(node)
           node['platform_family'] == 'debian' && platform_has_update_rcd?

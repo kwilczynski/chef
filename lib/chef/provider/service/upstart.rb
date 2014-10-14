@@ -32,9 +32,10 @@ class Chef
         replaces Chef::Provider::Service::Init
         replaces Chef::Provider::Service::Debian
         replaces Chef::Provider::Service::Insserv
+        replaces Chef::Provider::Service::Invokercd
 
         def self.enabled?(node)
-          node['platform_family'] != "windows" &&
+          node['os'] == "linux" &&
             platform_has_upstart?
         end
 
