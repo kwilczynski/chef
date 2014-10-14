@@ -37,6 +37,10 @@ describe Chef::ProviderResolver do
   let(:resolved_provider) { provider_resolver.resolve(resource, action) }
 
   describe "resolving service resource" do
+    before do
+      expect(File).not_to receive(:exist?)
+      expect(File).not_to receive(:exists?)
+    end
 
     let(:resource) { Chef::Resource::Service.new("ntp", run_context) }
 
@@ -44,47 +48,90 @@ describe Chef::ProviderResolver do
 
     shared_examples_for "a debian platform with upstart and update-rc.d" do
       before do
-        allow(File).to receive(:exist?).with("/etc/init").and_return(true)
-        allow(File).to receive(:exist?).with("/sbin/start").and_return(true)
-        allow(File).to receive(:exist?).with("/usr/sbin/update-rc.d").and_return(true)
-        allow(File).to receive(:exist?).with("/sbin/insserv").and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_update_rcd?).at_least(:once).and_return(true)
+        expect(Chef::Provider).to receive(:platform_has_insserv?).at_least(:once).and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_upstart?).at_least(:once).and_return(true)
       end
 
       it "when only the SysV init script exists, it returns a Service::Debian provider" do
-        allow(File).to receive(:exist?).with("/etc/init.d/ntp").and_return(true)
-        allow(File).to receive(:exist?).with("/etc/init/ntp.conf").and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(true)
+        expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(false)
         expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
         expect(resolved_provider).to be_a(Chef::Provider::Service::Debian)
       end
 
       it "when both SysV and Upstart scripts exist, it returns a Service::Upstart provider" do
-        allow(File).to receive(:exist?).with("/etc/init.d/ntp").and_return(true)
-        allow(File).to receive(:exist?).with("/etc/init/ntp.conf").and_return(true)
+        expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(true)
+        expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(true)
         expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
         expect(resolved_provider).to be_a(Chef::Provider::Service::Upstart)
       end
 
       it "when only the Upstart script exists, it returns a Service::Upstart provider" do
-        allow(File).to receive(:exist?).with("/etc/init.d/ntp").and_return(false)
-        allow(File).to receive(:exist?).with("/etc/init/ntp.conf").and_return(true)
+        expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(true)
         expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
         expect(resolved_provider).to be_a(Chef::Provider::Service::Upstart)
       end
 
       it "when both do not exist, it calls the old style provider resolver and returns a Debian Provider" do
-        allow(File).to receive(:exist?).with("/etc/init.d/ntp").and_return(false)
-        allow(File).to receive(:exist?).with("/etc/init/ntp.conf").and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(false)
+        expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(false)
         expect(provider_resolver).to receive(:maybe_chef_platform_lookup).with(resource, action).and_call_original
         expect(resolved_provider).to be_a(Chef::Provider::Service::Debian)
       end
     end
 
     shared_examples_for "a debian platform using the insserv provider" do
-      before do
-        allow(File).to receive(:exist?).with("/etc/init").and_return(true)
-        allow(File).to receive(:exist?).with("/sbin/start").and_return(false)
-        allow(File).to receive(:exist?).with("/usr/sbin/update-rc.d").and_return(true)
-        allow(File).to receive(:exist?).with("/sbin/insserv").and_return(true)
+      context "with a default install" do
+        before do
+          expect(Chef::Provider).to receive(:platform_has_update_rcd?).at_least(:once).and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_insserv?).at_least(:once).and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_upstart?).at_least(:once).and_return(false)
+        end
+
+        it "uses the Service::Insserv Provider to manage sysv init scripts" do
+          expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(false)
+          expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
+          expect(resolved_provider).to be_a(Chef::Provider::Service::Insserv)
+        end
+      end
+
+      context "when the user has installed upstart" do
+        before do
+          expect(Chef::Provider).to receive(:platform_has_update_rcd?).at_least(:once).and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_insserv?).at_least(:once).and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_upstart?).at_least(:once).and_return(true)
+        end
+
+        it "when only the SysV init script exists, it returns a Service::Debian provider" do
+          expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(false)
+          expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
+          expect(resolved_provider).to be_a(Chef::Provider::Service::Insserv)
+        end
+
+        it "when both SysV and Upstart scripts exist, it returns a Service::Upstart provider" do
+          expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(true)
+          expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(true)
+          expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
+          expect(resolved_provider).to be_a(Chef::Provider::Service::Upstart)
+        end
+
+        it "when only the Upstart script exists, it returns a Service::Upstart provider" do
+          expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(false)
+          expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(true)
+          expect(provider_resolver).not_to receive(:maybe_chef_platform_lookup)
+          expect(resolved_provider).to be_a(Chef::Provider::Service::Upstart)
+        end
+
+        it "when both do not exist, it calls the old style provider resolver and returns a Debian Provider" do
+          expect(Chef::Provider).to receive(:platform_has_initd_script?).at_least(:once).with("ntp").and_return(false)
+          expect(Chef::Provider).to receive(:platform_has_upstart_script?).at_least(:once).with("ntp").and_return(false)
+          expect(provider_resolver).to receive(:maybe_chef_platform_lookup).with(resource, action).and_call_original
+          expect(resolved_provider).to be_a(Chef::Provider::Service::Insserv)
+        end
       end
     end
 
@@ -93,7 +140,7 @@ describe Chef::ProviderResolver do
       let(:platform_family) { "debian" }
       let(:platform_version) { "14.04" }
 
-      #it_behaves_like "a debian platform using the debian provider"
+      it_behaves_like "a debian platform with upstart and update-rc.d"
     end
 
     describe "on Ubuntu 10.04" do
@@ -104,6 +151,7 @@ describe Chef::ProviderResolver do
       it_behaves_like "a debian platform with upstart and update-rc.d"
     end
 
+    # old debian uses the Debian provider (does not have insserv or upstart, or update-rc.d???)
     describe "on Debian 4.0" do
       let(:platform) { "debian" }
       let(:platform_family) { "debian" }
@@ -112,6 +160,7 @@ describe Chef::ProviderResolver do
       #it_behaves_like "a debian platform using the debian provider"
     end
 
+    # Debian replaced the debian provider with insserv in the FIXME:VERSION distro
     describe "on Debian 7.0" do
       let(:platform) { "debian" }
       let(:platform_family) { "debian" }
@@ -124,30 +173,15 @@ end
 
 #            :ubuntu   => {
 #                :service => Chef::Provider::Service::Debian,
-#            :gcel   => {
-#                :service => Chef::Provider::Service::Debian,
-#            :linaro   => {
-#                :service => Chef::Provider::Service::Debian,
-#            :raspbian   => {
-#                :service => Chef::Provider::Service::Debian,
-#            :linuxmint   => {
-#                :service => Chef::Provider::Service::Upstart,
 #            :debian => {
 #              :default => {
 #                :service => Chef::Provider::Service::Debian,
 #              ">= 6.0" => {
 #                :service => Chef::Provider::Service::Insserv
-
 #            :mac_os_x => {
-#                :service => Chef::Provider::Service::Macosx,
-#            :mac_os_x_server => {
 #                :service => Chef::Provider::Service::Macosx,
 #            :freebsd => {
 #                :service => Chef::Provider::Service::Freebsd,
-#            :xenserver   => {
-#                :service => Chef::Provider::Service::Redhat,
-#            :xcp   => {
-#                :service => Chef::Provider::Service::Redhat,
 #            :centos   => {
 #                :service => Chef::Provider::Service::Redhat,
 #            :amazon   => {
@@ -163,10 +197,6 @@ end
 #            :oracle  => {
 #                :service => Chef::Provider::Service::Redhat,
 #            :redhat   => {
-#                :service => Chef::Provider::Service::Redhat,
-#            :ibm_powerkvm   => {
-#                :service => Chef::Provider::Service::Redhat,
-#            :cloudlinux   => {
 #                :service => Chef::Provider::Service::Redhat,
 #            :gentoo   => {
 #                :service => Chef::Provider::Service::Gentoo,
@@ -198,7 +228,5 @@ end
 #                  ???
 #            :aix => {
 #                  ???
-#            :exherbo => {
-#                :service => Chef::Provider::Service::Systemd,
 #            :default => {
 #              :service => Chef::Provider::Service::Init,

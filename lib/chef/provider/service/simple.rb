@@ -27,6 +27,11 @@ class Chef
 
         attr_reader :status_load_success
 
+        def enabled?(node)
+          # this class is only inherited, it should never be used directly
+          false
+        end
+
         def load_current_resource
           @current_resource = Chef::Resource::Service.new(@new_resource.name)
           @current_resource.service_name(@new_resource.service_name)

@@ -27,14 +27,13 @@ class Chef
         attr_accessor :init_command
 
         implements :service
-        default_for :service
 
         def self.enabled?(node)
           node['platform_family'] != "windows"
         end
 
         def self.handles?(resource, action)
-          ::File.exist?("/etc/init.d/#{resource.service_name}")
+          platform_has_initd_script?(resource.service_name)
         end
 
         def initialize(new_resource, run_context)

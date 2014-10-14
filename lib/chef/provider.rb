@@ -31,16 +31,47 @@ class Chef
     extend Chef::Mixin::DescendantsTracker
 
     class << self
+
+      # FIXME: move these to some sugar module
+
+      def platform_has_update_rcd?
+        ::File.exist?("/usr/sbin/update-rc.d")
+      end
+
+      def platform_has_insserv?
+        ::File.exist?("/sbin/insserv")
+      end
+
+      def platform_has_upstart?
+        # debian >= 6.0 has /etc/init but does not have upstart
+        ::File.exist?("/etc/init") && ::File.exist?("/sbin/start")
+      end
+
+      def platform_has_initd_script?(service_name)
+        ::File.exist?("/etc/init.d/#{service_name}")
+      end
+
+      def platform_has_upstart_script?(service_name)
+        # FIXME: need @upstart_job_dir and @upstart_conf_suffix from the
+        # upstart provider
+        ::File.exist?("/etc/init/#{service_name}.conf")
+      end
+
+      # END FIXME
+
       attr_accessor :implementations
-      attr_accessor :default_array
+      attr_accessor :replace_classes
 
       def implementations
         @implementations ||= []
       end
 
-      def default_array
-        @default_array ||= []
+      def replace_classes
+        @replace_classes ||= []
       end
+
+      # FIXME: privatize
+      #private :implementations, :replace_classes
 
       # Providers can declare that they implement one or more resources.
       # (Question: does it make sense to map to more than one resource?)
@@ -48,12 +79,8 @@ class Chef
         self.implementations += resource_names
       end
 
-      # Service::Init works everywhere and will always be true on any non-windows
-      # platform, we need a way to make Service::Redhat and Service::Debian
-      # be preferred, so we mark Service::Init as a 'default' and discard it if any
-      # other provider can also do the work.
-      def default_for(*resource_names)
-        self.default_array += resource_names
+      def replaces(*classnames)
+        self.replace_classes += classnames
       end
 
       def implements?(resource)

@@ -16,8 +16,12 @@
 # limitations under the License.
 #
 
+require 'chef/mixin/convert_to_class_name'
+
 class Chef
   class ProviderResolver
+
+    include Chef::Mixin::ConvertToClassName
 
     attr_reader :node
 
@@ -50,11 +54,13 @@ class Chef
         klass.enabled?(node) && klass.implements?(resource) && klass.handles?(resource, action)
       end
 
-      # we need a single handler, if we have more than one reject the 'default' ones
-      if handlers.count >= 2
-        handlers.reject! { |klass| klass.default?(resource) }
-      end
+      # classes can declare that they replace other classes, gather them all
+      replacements = handlers.map { |klass| klass.replaces }.flatten
 
+      # reject all the classes that have been replaced
+      handlers -= replacements
+
+      # FIXME: real chef exception
       raise "too many handlers" if handlers.count >= 2
 
       return nil if handlers.empty?
