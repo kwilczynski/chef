@@ -30,7 +30,7 @@ class Chef
         replaces Chef::Provider::Service::Init
 
         def self.enabled?(node)
-          %w{rhel fedora suse}.includes?(node['platform_family']) &&
+          %w{rhel fedora suse}.include?(node['platform_family']) &&
             platform_has_chkconfig?
         end
 
