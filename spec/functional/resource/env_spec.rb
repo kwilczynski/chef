@@ -38,13 +38,15 @@ describe Chef::Resource::Env, :windows_only do
     } 
 
     before(:each) do
-      for i in 1..3
+      for i in 1..5
         resource_lower = Chef::Resource::Env.new(chef_env_test_lower_case, test_run_context)
         resource_lower.run_action(:delete)
         resource_mixed = Chef::Resource::Env.new(chef_env_test_mixed_case, test_run_context)
         resource_mixed.run_action(:delete)
         if ENV[chef_env_test_lower_case] || ENV[chef_env_test_mixed_case]
           sleep 10
+        else
+          break
         end
       end
     end
