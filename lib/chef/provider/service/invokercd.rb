@@ -27,9 +27,7 @@ class Chef
 
         replaces Chef::Provider::Service::Init
 
-        def self.enabled?(node)
-          node[:platform_family] == "debian"
-        end
+        supports_platform_family :debian
 
         def self.handles?(resource, action)
           Chef::Platform::ServiceHelpers.service_resource_providers.include?(:invokerc) &&

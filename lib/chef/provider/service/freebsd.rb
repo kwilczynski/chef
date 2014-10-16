@@ -30,9 +30,7 @@ class Chef
         implements :service
         replaces Chef::Provider::Service::Init
 
-        def self.enabled?(node)
-          %w{freebsd netbsd}.include?(node[:os])
-        end
+        supports_os :freebsd, :netbsd
 
         def self.handles?(resource, action)
           Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:etc_rcd) ||

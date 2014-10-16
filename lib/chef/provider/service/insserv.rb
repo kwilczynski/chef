@@ -31,9 +31,7 @@ class Chef
         replaces Chef::Provider::Service::Invokercd
         replaces Chef::Provider::Service::Redhat
 
-        def self.enabled?(node)
-          node[:os] == "linux"
-        end
+        supports_os :linux
 
         def self.handles?(resource, action)
           Chef::Platform::ServiceHelpers.service_resource_providers.include?(:insserv) &&

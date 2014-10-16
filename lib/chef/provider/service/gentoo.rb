@@ -25,9 +25,7 @@ class Chef::Provider::Service::Gentoo < Chef::Provider::Service::Init
 
   implements :service
 
-  def self.enabled?(node)
-    node[:platform_family] == "gentoo"
-  end
+  supports_platform_family :gentoo
 
   def self.handles?(resource, action)
     Dir.glob("/etc/runlevels/**/#{resource.service_name}").any?

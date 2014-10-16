@@ -16,6 +16,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
+
+require 'chef/resource'
+require 'chef/provider/log'
+
 class Chef
   class Resource
     class Log < Chef::Resource
@@ -49,6 +53,7 @@ class Chef
         @action = :write
         @allowed_actions.push(:write)
         @message = name
+        @provider = Chef::Provider::Log::ChefLog
       end
 
       def message(arg=nil)

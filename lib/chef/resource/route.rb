@@ -43,6 +43,7 @@ class Chef
         @hostname = nil
         @domainname = nil
         @domain = nil
+        @provider = Chef::Provider::Route
       end
 
       def networking(arg=nil)

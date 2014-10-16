@@ -30,9 +30,7 @@ class Chef
 
         replaces Chef::Provider::Service::Init
 
-        def self.enabled?(node)
-          node[:os] == "solaris2"
-        end
+        supports_os :solaris2
 
         def self.handles?(resource, action)
           true

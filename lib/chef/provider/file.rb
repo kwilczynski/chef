@@ -54,6 +54,13 @@ class Chef
       include Chef::Deprecation::Provider::File
       add_deprecation_warnings_for(Chef::Deprecation::Provider::File.instance_methods)
 
+      implements :file
+      supports_os :any
+
+      def self.handles?(resource, action)
+        true
+      end
+
       attr_reader :deployment_strategy
 
       attr_accessor :needs_creating

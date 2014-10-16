@@ -18,6 +18,7 @@
 #
 
 require 'chef/resource/execute'
+require 'chef/provider/script'
 
 class Chef
   class Resource
@@ -32,6 +33,7 @@ class Chef
         @code = nil
         @interpreter = nil
         @flags = nil
+        @provider = Chef::Provider::Script
       end
 
       def code(arg=nil)

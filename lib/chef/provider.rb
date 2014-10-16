@@ -34,6 +34,9 @@ class Chef
     class << self
       attr_accessor :implementations
       attr_accessor :replace_classes
+      attr_accessor :supported_osen
+      attr_accessor :supported_platform_families
+      attr_accessor :supported_platforms
 
       def implementations
         @implementations ||= []
@@ -41,6 +44,18 @@ class Chef
 
       def replace_classes
         @replace_classes ||= []
+      end
+
+      def supported_osen
+        @supported_osen ||= []
+      end
+
+      def supported_platform_families
+        @supported_platform_families ||= []
+      end
+
+      def supported_platforms
+        @supported_platforms ||= []
       end
 
       # FIXME: privatize
@@ -71,10 +86,30 @@ class Chef
         false
       end
 
+      def supports_os(*os_names)
+        self.supported_osen += os_names.map { |n| n.to_s }
+      end
+
+      def supports_platform_family(*platform_family_names)
+        self.supported_platform_families += platform_family_names.map { |n| n.to_s }
+      end
+
+      def supports_platform(*platform_names)
+        self.supported_platforms += platform_names.map { |n| n.to_s }
+      end
+
       # If the provider is useful at all on the node
       # (we should use this to remove_const the classes which are unused + then GC)
       def enabled?(node)
-        true
+        if supported_osen || supported_platform_families || supported_platforms
+          supported_osen.include?("any") ||
+            supported_osen.include?(node[:os]) ||
+            supported_platform_families.include?(node[:platform_family]) ||
+            supported_platforms.include?(node[:platform])
+        else
+          # if we declare nothing and do not override this function, always enable
+          true
+        end
       end
     end
 

@@ -17,6 +17,9 @@
 # limitations under the License.
 #
 
+require 'chef/resource'
+require 'chef/provider/ruby_block'
+
 class Chef
   class Resource
     class RubyBlock < Chef::Resource
@@ -29,6 +32,7 @@ class Chef
         @action = "run"
         @allowed_actions << :create << :run
         @block_name = name
+        @provider = Chef::Provider::RubyBlock
       end
 
       def block(&block)

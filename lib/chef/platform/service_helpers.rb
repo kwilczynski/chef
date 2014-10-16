@@ -102,7 +102,12 @@ class Chef
           when "solaris2"
             Chef::Provider::Service::Solaris2
           when "linux"
-            Chef::Provider::Service::Init
+            case node[:platform_family]
+            when "debian"
+              Chef::Provider::Service::Debian
+            else
+              Chef::Provider::Service::Init
+            end
           else
             Chef::Provider::Service::Init
           end

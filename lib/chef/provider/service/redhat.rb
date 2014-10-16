@@ -29,9 +29,7 @@ class Chef
         implements :service
         replaces Chef::Provider::Service::Init
 
-        def self.enabled?(node)
-          %w{rhel fedora suse}.include?(node[:platform_family])
-        end
+        supports_platform_family :rhel, :fedora, :suse
 
         def self.handles?(resource, action)
           Chef::Platform::ServiceHelpers.service_resource_providers.include?(:redhat) &&

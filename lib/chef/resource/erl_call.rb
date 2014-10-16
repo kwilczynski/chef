@@ -18,6 +18,7 @@
 #
 
 require 'chef/resource'
+require 'chef/provider/erl_call'
 
 class Chef
   class Resource
@@ -39,6 +40,7 @@ class Chef
 
         @action = "run"
         @allowed_actions.push(:run)
+        @provider = Chef::Provider::ErlCall
       end
 
       def code(arg=nil)

@@ -30,9 +30,7 @@ class Chef
 
         replaces Chef::Provider::Service::Init
 
-        def self.enabled?(node)
-          node[:os] == "darwin"
-        end
+        supports_os :darwin
 
         def self.handles?(resource, action)
           true

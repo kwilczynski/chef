@@ -22,9 +22,7 @@ class Chef::Provider::Service::Arch < Chef::Provider::Service::Init
 
   implements :service
 
-  def self.enabled?(node)
-    node[:platform_family] == "arch"
-  end
+  supports_platform_family :arch
 
   def self.handles?(resource, action)
     ::File.exist?("/etc/rc.d/#{resource.service_name}")

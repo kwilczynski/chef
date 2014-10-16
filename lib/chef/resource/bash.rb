@@ -17,6 +17,7 @@
 #
 
 require 'chef/resource/script'
+require 'chef/provider/script'
 
 class Chef
   class Resource
@@ -26,6 +27,7 @@ class Chef
         super
         @resource_name = :bash
         @interpreter = "bash"
+        @provider = Chef::Provider::Script
       end
 
     end

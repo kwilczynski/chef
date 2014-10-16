@@ -22,7 +22,7 @@ require 'chef/platform/default_providers'
 class Chef
   class ProviderResolver
 
-    FORCE_DYNAMIC_RESOLUTION = [ :service, :file ]
+    FORCE_DYNAMIC_RESOLUTION = [ :service, :bash, :csh, :directory, :erl_call, :execute, :file, :http_request, :link, :log, :perl, :python, :remote_directory, :route, :ruby, :ruby_block, :script, :template, :whyrun_safe_ruby_block ]
 
     attr_reader :node
 

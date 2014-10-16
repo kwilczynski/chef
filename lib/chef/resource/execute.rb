@@ -18,6 +18,7 @@
 #
 
 require 'chef/resource'
+require 'chef/provider/execute'
 
 class Chef
   class Resource
@@ -41,6 +42,7 @@ class Chef
         @user = nil
         @allowed_actions.push(:run)
         @umask = nil
+        @provider = Chef::Provider::Execute
       end
 
       def umask(arg=nil)

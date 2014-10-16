@@ -18,6 +18,7 @@
 #
 
 require 'chef/resource'
+require 'chef/provider/http_request'
 
 class Chef
   class Resource
@@ -33,6 +34,7 @@ class Chef
         @action = :get
         @headers = {}
         @allowed_actions.push(:get, :put, :post, :delete, :head, :options)
+        @provider = Chef::Provider::HttpRequest
       end
 
       def url(args=nil)

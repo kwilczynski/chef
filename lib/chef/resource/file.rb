@@ -19,7 +19,6 @@
 
 require 'chef/resource'
 require 'chef/platform/query_helpers'
-require 'chef/provider/file'
 require 'chef/mixin/securable'
 
 class Chef
@@ -47,7 +46,6 @@ class Chef
         @backup = 5
         @action = "create"
         @allowed_actions.push(:create, :delete, :touch, :create_if_missing)
-        @provider = Chef::Provider::File
         @atomic_update = Chef::Config[:file_atomic_update]
         @force_unlink = false
         @manage_symlink_source = nil

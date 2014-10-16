@@ -26,46 +26,8 @@ class Chef
           case resource.resource_name
           when :service
             Chef::Platform::ServiceHelpers.provider_for(node)
-
-          # the following is entirely static and should probably be moved into the resource
-          when :bash
-            Chef::Provider::Script
-          when :csh
-            Chef::Provider::Script
-          when :directory
-            Chef::Provider::Directory
-          when :erl_call
-            Chef::Provider::ErlCall
-          when :execute
-            Chef::Provider::Execute
-          when :file
-            Chef::Provider::File
-          when :http_request
-            Chef::Provider::HttpRequest
-          when :link
-            Chef::Provider::Link
-          when :log
-            Chef::Provider::Log::ChefLog
-          when :perl
-            Chef::Provider::Script
-          when :python
-            Chef::Provider::Script
-          when :remote_directory
-            Chef::Provider::RemoteDirectory
-          when :route
-            Chef::Provider::Route
-          when :ruby
-            Chef::Provider::Script
-          when :ruby_block
-            Chef::Provider::RubyBlock
-          when :script
-            Chef::Provider::Script
-          when :template
-            Chef::Provider::Template
-          when :whyrun_safe_ruby_block
-            Chef::Provider::WhyrunSafeRubyBlock
           else
-            raise "something"
+            raise "FIXME: add an exception"
           end
         end
       end

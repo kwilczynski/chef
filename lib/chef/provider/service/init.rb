@@ -28,6 +28,7 @@ class Chef
 
         implements :service
 
+        # aka supports_os :not-windows
         def self.enabled?(node)
           node[:os] != "windows"
         end
