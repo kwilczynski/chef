@@ -23,7 +23,7 @@ class Chef::Provider::Service::Arch < Chef::Provider::Service::Init
   implements :service
 
   def self.enabled?(node)
-    node['platform_family'] == "arch"
+    node[:platform_family] == "arch"
   end
 
   def self.handles?(resource, action)

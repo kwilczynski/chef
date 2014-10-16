@@ -355,5 +355,12 @@ class Chef
     end
 
     class InvalidSearchQuery < ArgumentError; end
+
+    # Raised by Chef::ProviderResolver
+    class AmbiguousProviderResolution < RuntimeError
+      def initialize(resource, classes)
+        super "Found more than one provider for #{resource.resource_name} resource: #{classes}"
+      end
+    end
   end
 end

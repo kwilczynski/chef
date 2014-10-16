@@ -32,34 +32,34 @@ class Chef
         replaces Chef::Provider::Service::Redhat
 
         def self.enabled?(node)
-          node['os'] == "linux" &&
-            platform_has_insserv?
+          node[:os] == "linux"
         end
 
         def self.handles?(resource, action)
-          platform_has_initd_script?(resource.service_name)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:insserv) &&
+            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
         end
 
         def load_current_resource
           super
 
-          # Look for a /etc/rc.*/SnnSERVICE link to signifiy that the service would be started in a runlevel
-          if Dir.glob("/etc/rc**/S*#{Chef::Util::PathHelper.escape_glob(@current_resource.service_name)}").empty?
-            @current_resource.enabled false
+          # Look for a /etc/rc.*/SnnSERVICE link to signify that the service would be started in a runlevel
+          if Dir.glob("/etc/rc**/S*#{Chef::Util::PathHelper.escape_glob(current_resource.service_name)}").empty?
+            current_resource.enabled false
           else
-            @current_resource.enabled true
+            current_resource.enabled true
           end
 
-          @current_resource
+          current_resource
         end
 
         def enable_service()
-          shell_out!("/sbin/insserv -r -f #{@new_resource.service_name}")
-          shell_out!("/sbin/insserv -d -f #{@new_resource.service_name}")
+          shell_out!("/sbin/insserv -r -f #{new_resource.service_name}")
+          shell_out!("/sbin/insserv -d -f #{new_resource.service_name}")
         end
 
         def disable_service()
-          shell_out!("/sbin/insserv -r -f #{@new_resource.service_name}")
+          shell_out!("/sbin/insserv -r -f #{new_resource.service_name}")
         end
       end
     end

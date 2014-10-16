@@ -33,12 +33,12 @@ class Chef::Provider::Service::Systemd < Chef::Provider::Service::Simple
   replaces Chef::Provider::Service::Gentoo
 
   def self.enabled?(node)
-    node['os'] == 'linux' &&
-      platform_has_systemd?
+    node[:os] == 'linux'
   end
 
   def self.handles?(resource, action)
-    platform_has_systemd_service?(resource.service_name)
+    Chef::Platform::ServiceHelpers.service_resource_providers.include?(:systemd) &&
+      platform_has_systemd_service?(resource.service_name)
   end
 
   def load_current_resource

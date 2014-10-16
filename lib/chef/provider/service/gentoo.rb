@@ -26,7 +26,7 @@ class Chef::Provider::Service::Gentoo < Chef::Provider::Service::Init
   implements :service
 
   def self.enabled?(node)
-    node['platform_family'] == "gentoo"
+    node[:platform_family] == "gentoo"
   end
 
   def self.handles?(resource, action)

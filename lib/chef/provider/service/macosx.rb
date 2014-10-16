@@ -28,8 +28,10 @@ class Chef
 
         implements :service
 
+        replaces Chef::Provider::Service::Init
+
         def self.enabled?(node)
-          node['os'] == "darwin"
+          node[:os] == "darwin"
         end
 
         def self.handles?(resource, action)

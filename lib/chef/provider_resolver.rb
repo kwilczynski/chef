@@ -16,8 +16,13 @@
 # limitations under the License.
 #
 
+require 'chef/exceptions'
+require 'chef/platform/default_providers'
+
 class Chef
   class ProviderResolver
+
+    FORCE_DYNAMIC_RESOLUTION = [ :service, :file ]
 
     attr_reader :node
 
@@ -31,24 +36,55 @@ class Chef
     end
 
     def resolve(resource, action)
-      provider = maybe_explicit_provider(resource, action) ||
-        maybe_dynamic_provider_resolution(resource, action) ||
-        maybe_chef_platform_lookup(resource, action)
+      provider = maybe_explicit_provider(resource)
+
+      if provider.nil?
+        provider = maybe_dynamic_provider_resolution(resource, action)
+      end
+
+      if provider.nil?
+        if must_dynamically_resolve(resource)
+          provider = maybe_default_provider_helper(resource)
+        else
+          provider = maybe_chef_platform_lookup(resource, action)
+        end
+      end
+
       provider.action = action
       provider
     end
 
+    private
+
+    def must_dynamically_resolve(resource)
+      FORCE_DYNAMIC_RESOLUTION.include?(resource.resource_name)
+    end
+
     # if resource.provider is set, just return one of those objects
-    def maybe_explicit_provider(resource, action)
+    def maybe_explicit_provider(resource)
       return nil unless resource.provider
       resource.provider.new(resource, resource.run_context)
+    end
+
+    def maybe_default_provider_helper(resource)
+      Chef::Platform::DefaultProviders.provider_for(node, resource).new(resource, resource.run_context)
     end
 
     # try dynamically finding a provider based on querying the providers to see what they support
     def maybe_dynamic_provider_resolution(resource, action)
       handlers = providers.select do |klass|
-        klass.enabled?(node) && klass.implements?(resource) && klass.handles?(resource, action)
+        klass.enabled?(node) && klass.implements?(resource)
       end
+
+      # log this so we know what providers will work for the generic resource on the node
+      Chef::Log.debug "providers for generic #{resource.resource_name} resource enabled on node include: #{handlers}"
+
+      handlers.select! do |klass|
+        klass.handles?(resource, action)
+      end
+
+      # log this separately from above so we know what providers were excluded by config
+      Chef::Log.debug "providers that support resource #{resource} include: #{handlers}"
 
       # classes can declare that they replace other classes, gather them all
       replacements = handlers.map { |klass| klass.replaces }.flatten
@@ -56,8 +92,9 @@ class Chef
       # reject all the classes that have been replaced
       handlers -= replacements
 
-      # FIXME: real chef exception
-      raise "too many handlers" if handlers.count >= 2
+      Chef::Log.debug "providers that survived replacement include: #{handlers}"
+
+      raise Chef::Exceptions::AmbiguousProviderResolution.new(resource, handlers) if handlers.count >= 2
 
       return nil if handlers.empty?
 

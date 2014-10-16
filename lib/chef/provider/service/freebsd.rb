@@ -28,14 +28,15 @@ class Chef
         attr_reader :enabled_state_found
 
         implements :service
+        replaces Chef::Provider::Service::Init
 
         def self.enabled?(node)
-          %w{freebsd netbsd}.include?(node['os'])
+          %w{freebsd netbsd}.include?(node[:os])
         end
 
         def self.handles?(resource, action)
-          ::File.exist?("/etc/rc.d/#{resource.service_name}") ||
-            ::File.exist?("/usr/local/etc/rc.d/#{resource.service_name}")
+          Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:etc_rcd) ||
+            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:usr_local_etc_rcd)
         end
 
         include Chef::Mixin::ShellOut

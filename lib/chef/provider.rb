@@ -23,6 +23,7 @@ require 'chef/mixin/enforce_ownership_and_permissions'
 require 'chef/mixin/why_run'
 require 'chef/mixin/shell_out'
 require 'chef/mixin/descendants_tracker'
+require 'chef/platform/service_helpers'
 
 class Chef
   class Provider
@@ -31,59 +32,6 @@ class Chef
     extend Chef::Mixin::DescendantsTracker
 
     class << self
-
-      # FIXME: move these to some sugar module
-
-      def platform_has_update_rcd?
-        ::File.exist?("/usr/sbin/update-rc.d")
-      end
-
-      def platform_has_invoke_rcd?
-        ::File.exist?("/usr/sbin/update-rc.d")
-      end
-
-      def platform_has_insserv?
-        ::File.exist?("/sbin/insserv")
-      end
-
-      def platform_has_upstart?
-        # debian >= 6.0 has /etc/init but does not have upstart
-        ::File.exist?("/etc/init") && ::File.exist?("/sbin/start")
-      end
-
-      def platform_has_chkconfig?
-        ::File.exist?("/sbin/chkconfig")
-      end
-
-      def platform_has_systemd?
-        ::File.exist?("/bin/systemctl")
-      end
-
-      def platform_has_initd_script?(service_name)
-        ::File.exist?("/etc/init.d/#{service_name}")
-      end
-
-      def platform_has_upstart_script?(service_name)
-        # FIXME: need @upstart_job_dir and @upstart_conf_suffix from the
-        # upstart provider
-        ::File.exist?("/etc/init/#{service_name}.conf")
-      end
-
-      def extract_systsemd_services(output)
-        # first line finds e.g. "sshd.service"
-        services = output.lines.split.map { |l| l.split[0] }
-        # this splits off the suffix after the last dot to return "sshd"
-        services += services.map { |s| s.sub(/(.*)\..*/, '\1') }
-      end
-
-      def platform_has_systemd_unit?(service_name)
-        services = extract_systemd_services(shell_out!("systemctl --all").stdout) +
-          extract_systemd_services(shell_out!("systemctl --list-unit-files").stdout)
-        services.include?(service_name)
-      end
-
-      # END FIXME
-
       attr_accessor :implementations
       attr_accessor :replace_classes
 

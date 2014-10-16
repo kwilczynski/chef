@@ -35,12 +35,12 @@ class Chef
         replaces Chef::Provider::Service::Invokercd
 
         def self.enabled?(node)
-          node['os'] == "linux" &&
-            platform_has_upstart?
+          node[:os] == "linux"
         end
 
         def self.handles?(resource, action)
-          platform_has_upstart_script?(resource.service_name)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:upstart) &&
+            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:upstart)
         end
 
         # Upstart does more than start or stop a service, creating multiple 'states' [1] that a service can be in.

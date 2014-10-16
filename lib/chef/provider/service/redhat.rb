@@ -30,12 +30,12 @@ class Chef
         replaces Chef::Provider::Service::Init
 
         def self.enabled?(node)
-          %w{rhel fedora suse}.include?(node['platform_family']) &&
-            platform_has_chkconfig?
+          %w{rhel fedora suse}.include?(node[:platform_family])
         end
 
         def self.handles?(resource, action)
-          platform_has_initd_script?(resource.service_name)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:redhat) &&
+            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
         end
 
         def initialize(new_resource, run_context)

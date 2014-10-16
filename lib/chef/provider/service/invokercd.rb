@@ -28,12 +28,12 @@ class Chef
         replaces Chef::Provider::Service::Init
 
         def self.enabled?(node)
-          node['platform_family'] == "debian" &&
-            platform_has_invoke_rcd?
+          node[:platform_family] == "debian"
         end
 
         def self.handles?(resource, action)
-          platform_has_initd_script?(resource.service_name)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:invokerc) &&
+            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
         end
 
         def initialize(new_resource, run_context)

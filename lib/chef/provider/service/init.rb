@@ -29,11 +29,11 @@ class Chef
         implements :service
 
         def self.enabled?(node)
-          node['platform_family'] != "windows"
+          node[:os] != "windows"
         end
 
         def self.handles?(resource, action)
-          platform_has_initd_script?(resource.service_name)
+          Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
         end
 
         def initialize(new_resource, run_context)
