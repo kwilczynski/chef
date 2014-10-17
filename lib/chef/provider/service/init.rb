@@ -27,15 +27,8 @@ class Chef
         attr_accessor :init_command
 
         implements :service
-
         # aka supports_os :not-windows
-        def self.enabled?(node)
-          node[:os] != "windows"
-        end
-
-        def self.handles?(resource, action)
-          Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
-        end
+        supports_os :linux, :freebsd, :netbsd, :openbsd, :solaris2, :darwin, :hpux, :aix
 
         def initialize(new_resource, run_context)
           super

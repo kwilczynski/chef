@@ -25,6 +25,10 @@ class Chef
     class Package
       class Apt < Chef::Provider::Package
 
+        implements :apt_package
+        supports_os :linux
+        supports_platform_family :debian
+
         attr_accessor :is_virtual_package
 
         def load_current_resource

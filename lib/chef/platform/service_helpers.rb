@@ -88,31 +88,6 @@ class Chef
           configs
         end
 
-        # This mapping is *ONLY* for the default provider if the provider
-        # resolver dynamic resolution fails, and we have to return some kind of
-        # best-guess provider for why-run and error messages.
-        def provider_for(node)
-          case node[:os]
-          when "freebsd", "netbsd"
-            Chef::Provider::Service::Freebsd
-          when "mac_os_x"
-            Chef::Provider::Service::Freebsd
-          when "windows"
-            Chef::Provider::Service::Windows
-          when "solaris2"
-            Chef::Provider::Service::Solaris2
-          when "linux"
-            case node[:platform_family]
-            when "debian"
-              Chef::Provider::Service::Debian
-            else
-              Chef::Provider::Service::Init
-            end
-          else
-            Chef::Provider::Service::Init
-          end
-        end
-
         private
 
         def extract_systemd_services(output)

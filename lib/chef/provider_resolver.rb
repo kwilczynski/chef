@@ -17,12 +17,57 @@
 #
 
 require 'chef/exceptions'
-require 'chef/platform/default_providers'
 
 class Chef
   class ProviderResolver
 
-    FORCE_DYNAMIC_RESOLUTION = [ :service, :bash, :csh, :directory, :erl_call, :execute, :file, :http_request, :link, :log, :perl, :python, :remote_directory, :route, :ruby, :ruby_block, :script, :template, :whyrun_safe_ruby_block ]
+    FORCE_DYNAMIC_RESOLUTION = [
+      :service,
+      :apt_package,
+      :bash,
+      :bff_package,
+      :breakpoint,
+      :chef_gem,
+      :cookbook_file,
+      :csh,
+      :deploy,
+      :deploy_revision,
+      :directory,
+      :dpkg_package,
+      :dsc_script,
+      :easy_install_package,
+      :erl_call,
+      :execute,
+      :file,
+      :gem_package,
+      :git,
+      :homebrew_package,
+      :http_request,
+      :ips_package,
+      :link,
+      :log,
+      :macports_package,
+      :pacman_package,
+      :pauldis_package,
+      :perl,
+      :portage_package,
+      :python,
+      :remote_directory,
+      :route,
+      :rpm_package,
+      :ruby,
+      :ruby_block,
+      :script,
+      :smartos_package,
+      :solaris_package,
+      :subversion,
+      :template,
+      :timestamped_deploy,
+      :whyrun_safe_ruby_block,
+      :windows_package,
+      :windows_service,
+      :yum_package,
+    ]
 
     attr_reader :node
 
@@ -44,7 +89,7 @@ class Chef
 
       if provider.nil?
         if must_dynamically_resolve(resource)
-          provider = maybe_default_provider_helper(resource)
+          raise "FIXME REAL ERROR: could not find provider"
         else
           provider = maybe_chef_platform_lookup(resource, action)
         end

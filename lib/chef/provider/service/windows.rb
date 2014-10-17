@@ -26,12 +26,7 @@ end
 class Chef::Provider::Service::Windows < Chef::Provider::Service
 
   implements :service
-
   supports_os :windows
-
-  def self.handles?(resource, action)
-    true
-  end
 
   include Chef::Mixin::ShellOut
 

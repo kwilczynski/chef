@@ -28,12 +28,10 @@ class Chef
         UPSTART_STATE_FORMAT = /\w+ \(?(\w+)\)?[\/ ](\w+)/
 
         implements :service
-
         replaces Chef::Provider::Service::Init
         replaces Chef::Provider::Service::Debian
         replaces Chef::Provider::Service::Insserv
         replaces Chef::Provider::Service::Invokercd
-
         supports_os :linux
 
         def self.handles?(resource, action)

@@ -24,12 +24,7 @@ require 'chef/util/path_helper'
 class Chef::Provider::Service::Gentoo < Chef::Provider::Service::Init
 
   implements :service
-
   supports_platform_family :gentoo
-
-  def self.handles?(resource, action)
-    Dir.glob("/etc/runlevels/**/#{resource.service_name}").any?
-  end
 
   def load_current_resource
 

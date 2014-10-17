@@ -25,17 +25,14 @@ class Chef
       class Insserv < Chef::Provider::Service::Init
 
         implements :service
-
         replaces Chef::Provider::Service::Init
         replaces Chef::Provider::Service::Debian
         replaces Chef::Provider::Service::Invokercd
         replaces Chef::Provider::Service::Redhat
-
         supports_os :linux
 
         def self.handles?(resource, action)
-          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:insserv) &&
-            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:insserv)
         end
 
         def load_current_resource

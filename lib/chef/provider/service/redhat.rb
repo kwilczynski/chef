@@ -28,12 +28,10 @@ class Chef
 
         implements :service
         replaces Chef::Provider::Service::Init
-
         supports_platform_family :rhel, :fedora, :suse
 
         def self.handles?(resource, action)
-          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:redhat) &&
-            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:redhat)
         end
 
         def initialize(new_resource, run_context)

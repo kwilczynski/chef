@@ -28,12 +28,10 @@ class Chef
         implements :service
         replaces Chef::Provider::Service::Init
         replaces Chef::Provider::Service::Invokercd
-
         supports_platform_family :debian
 
         def self.handles?(resource, action)
-          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:debian) &&
-            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:debian)
         end
 
         def load_current_resource

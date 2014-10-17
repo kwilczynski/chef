@@ -30,8 +30,7 @@ class Chef
         supports_platform_family :debian
 
         def self.handles?(resource, action)
-          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:invokerc) &&
-            Chef::Platform::ServiceHelpers.config_for_service(resource.service_name).include?(:initd)
+          Chef::Platform::ServiceHelpers.service_resource_providers.include?(:invokerc)
         end
 
         def initialize(new_resource, run_context)

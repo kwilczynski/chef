@@ -21,7 +21,6 @@ require 'chef/provider/service/init'
 class Chef::Provider::Service::Arch < Chef::Provider::Service::Init
 
   implements :service
-
   supports_platform_family :arch
 
   def self.handles?(resource, action)

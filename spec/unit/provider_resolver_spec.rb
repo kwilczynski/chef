@@ -17,6 +17,9 @@
 #
 
 require 'spec_helper'
+require 'chef/mixin/convert_to_class_name'
+
+include Chef::Mixin::ConvertToClassName
 
 describe Chef::ProviderResolver do
 
@@ -286,6 +289,75 @@ describe Chef::ProviderResolver do
     end
 
   end
+
+  describe "resolving static providers" do
+    def resource_class(resource)
+      Chef::Resource.const_get(convert_to_class_name(resource.to_s))
+    end
+
+    describe "on Ubuntu 14.04" do
+      let(:os) { "linux" }
+      let(:platform) { "ubuntu" }
+      let(:platform_family) { "debian" }
+      let(:platform_version) { "14.04" }
+
+      static_mapping = {
+        apt_package:  Chef::Provider::Package::Apt,
+        bash: Chef::Provider::Script,
+        bff_package: Chef::Provider::Package::Aix,
+        breakpoint:  Chef::Provider::Breakpoint,
+        chef_gem: Chef::Provider::Package::Rubygems,
+        cookbook_file:  Chef::Provider::CookbookFile,
+        csh:  Chef::Provider::Script,
+        deploy:   Chef::Provider::Deploy::Timestamped,
+        deploy_revision:  Chef::Provider::Deploy::Revision,
+        directory:  Chef::Provider::Directory,
+        dpkg_package: Chef::Provider::Package::Dpkg,
+        dsc_script: Chef::Provider::DscScript,
+        easy_install_package:  Chef::Provider::Package::EasyInstall,
+        erl_call: Chef::Provider::ErlCall,
+        execute:  Chef::Provider::Execute,
+        file: Chef::Provider::File,
+        gem_package: Chef::Provider::Package::Rubygems,
+        git:  Chef::Provider::Git,
+        homebrew_package: Chef::Provider::Package::Homebrew,
+        http_request: Chef::Provider::HttpRequest,
+        ips_package: Chef::Provider::Package::Ips,
+        link:  Chef::Provider::Link,
+        log:  Chef::Provider::Log::ChefLog,
+        macports_package:  Chef::Provider::Package::Macports,
+        pacman_package: Chef::Provider::Package::Pacman,
+        paludis_package: Chef::Provider::Package::Paludis,
+        perl: Chef::Provider::Script,
+        portage_package:  Chef::Provider::Package::Portage,
+        python: Chef::Provider::Script,
+        remote_directory: Chef::Provider::RemoteDirectory,
+        route:  Chef::Provider::Route,
+        rpm_package:  Chef::Provider::Package::Rpm,
+        ruby:  Chef::Provider::Script,
+        ruby_block:   Chef::Provider::RubyBlock,
+        script:   Chef::Provider::Script,
+        smartos_package:  Chef::Provider::Package::SmartOS,
+        solaris_package:  Chef::Provider::Package::Solaris,
+        subversion:   Chef::Provider::Subversion,
+        template:   Chef::Provider::Template,
+        timestamped_deploy:  Chef::Provider::Deploy::Timestamped,
+        whyrun_safe_ruby_block:  Chef::Provider::WhyrunSafeRubyBlock,
+        windows_package:  Chef::Provider::Package::Windows,
+        windows_service:  Chef::Provider::Service::Windows,
+        yum_package:  Chef::Provider::Package::Yum,
+      }
+      static_mapping.each do |static_resource, static_provider|
+        context "when the resource is a #{static_resource}" do
+          let(:resource) { resource_class(static_resource).new("foo", run_context) }
+          let(:action) { :start }  # in reality this doesn't matter much
+          it "should resolve to a #{static_provider} provider" do
+            expect(resolved_provider).to be_a(static_provider)
+          end
+        end
+      end
+    end
+  end
 end
 
 #            :ubuntu   => {
@@ -295,10 +367,6 @@ end
 #                :service => Chef::Provider::Service::Debian,
 #              ">= 6.0" => {
 #                :service => Chef::Provider::Service::Insserv
-#            :mac_os_x => {
-#                :service => Chef::Provider::Service::Macosx,
-#            :freebsd => {
-#                :service => Chef::Provider::Service::Freebsd,
 #            :centos   => {
 #                :service => Chef::Provider::Service::Redhat,
 #            :amazon   => {
@@ -319,10 +387,6 @@ end
 #                :service => Chef::Provider::Service::Gentoo,
 #            :arch   => {
 #                :service => Chef::Provider::Service::Systemd,
-#            :netbsd => {
-#                :service => Chef::Provider::Service::Freebsd,
-#            :openbsd => {
-#                  ???
 #            :hpux => {
 #                  ???
 #            :aix => {

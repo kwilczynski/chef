@@ -83,7 +83,7 @@ class Chef
       # The type of resource passed in here should only be resources that the provider
       # has declared that it implements.
       def handles?(resource, action)
-        false
+        true
       end
 
       def supports_os(*os_names)
@@ -101,15 +101,10 @@ class Chef
       # If the provider is useful at all on the node
       # (we should use this to remove_const the classes which are unused + then GC)
       def enabled?(node)
-        if supported_osen || supported_platform_families || supported_platforms
-          supported_osen.include?("any") ||
-            supported_osen.include?(node[:os]) ||
-            supported_platform_families.include?(node[:platform_family]) ||
-            supported_platforms.include?(node[:platform])
-        else
-          # if we declare nothing and do not override this function, always enable
-          true
-        end
+        supported_osen.include?("any") ||
+          supported_osen.include?(node[:os]) ||
+          supported_platform_families.include?(node[:platform_family]) ||
+          supported_platforms.include?(node[:platform])
       end
     end
 

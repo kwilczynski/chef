@@ -26,6 +26,9 @@ class Chef
     class Package
       class Aix < Chef::Provider::Package
 
+        implements :bff_package
+        supports_os :aix
+
         include Chef::Mixin::GetSourceFromPackage
 
         def define_resource_requirements

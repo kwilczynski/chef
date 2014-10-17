@@ -27,14 +27,8 @@ class Chef
         attr_reader :maintenance
 
         implements :service
-
         replaces Chef::Provider::Service::Init
-
         supports_os :solaris2
-
-        def self.handles?(resource, action)
-          true
-        end
 
         def initialize(new_resource, run_context=nil)
           super

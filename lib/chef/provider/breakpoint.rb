@@ -20,6 +20,9 @@ class Chef
   class Provider
     class Breakpoint < Chef::Provider
 
+      implements :breakpoint
+      supports_os :any
+
       def load_current_resource
       end
 

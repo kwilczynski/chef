@@ -29,6 +29,9 @@ class Chef
     class Package
       class Yum < Chef::Provider::Package
 
+        implements :yum_package
+        supports_os :linux
+
         class RPMUtils
           class << self
 

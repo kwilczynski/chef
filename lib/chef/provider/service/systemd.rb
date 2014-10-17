@@ -22,7 +22,6 @@ require 'chef/provider/service/simple'
 class Chef::Provider::Service::Systemd < Chef::Provider::Service::Simple
 
   implements :service
-
   # We welcome our new systemd masters
   replaces Chef::Provider::Service::Init
   replaces Chef::Provider::Service::Debian
@@ -31,12 +30,10 @@ class Chef::Provider::Service::Systemd < Chef::Provider::Service::Simple
   replaces Chef::Provider::Service::Insserv
   replaces Chef::Provider::Service::Arch
   replaces Chef::Provider::Service::Gentoo
-
   supports_os :linux
 
   def self.handles?(resource, action)
-    Chef::Platform::ServiceHelpers.service_resource_providers.include?(:systemd) &&
-      platform_has_systemd_service?(resource.service_name)
+    Chef::Platform::ServiceHelpers.service_resource_providers.include?(:systemd)
   end
 
   def load_current_resource

@@ -27,14 +27,8 @@ class Chef
       class Macosx < Chef::Provider::Service::Simple
 
         implements :service
-
         replaces Chef::Provider::Service::Init
-
         supports_os :darwin
-
-        def self.handles?(resource, action)
-          true
-        end
 
         def self.gather_plist_dirs
           locations = %w{/Library/LaunchAgents
