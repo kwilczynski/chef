@@ -19,7 +19,7 @@
 require 'chef/provider'
 require 'chef/mixin/command'
 require 'chef/resource/env'
-require 'pry'
+
 class Chef
   class Provider
     class Env < Chef::Provider
